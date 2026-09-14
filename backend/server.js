@@ -14,7 +14,12 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Middleware
-app.use(cors({ origin: '*' }));
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+}));
+app.options('*', cors());
 app.use(express.json());
 app.use(morgan('dev'));
 
@@ -50,18 +55,19 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Database connection helper with automatic fallback to in-memory MongoDB
+// Database connection helper with automatic fallback to Atlas cluster or in-memory MongoDB
 const connectDB = async () => {
-  const mongoUri = process.env.MONGODB_URI;
+  const defaultAtlasUri = 'mongodb+srv://nitrongym_db_user:46Fh7lQMuG7aZqS1@cluster0.cbeoafy.mongodb.net/nitrofitnessgym?retryWrites=true&w=majority&appName=Cluster0';
+  const mongoUri = process.env.MONGODB_URI || defaultAtlasUri;
 
   if (mongoUri) {
     try {
-      console.log(`[Database] Connecting to MongoDB at ${mongoUri}...`);
+      console.log(`[Database] Connecting to MongoDB at ${mongoUri.replace(/:([^:@]+)@/, ':****@')}...`);
       await mongoose.connect(mongoUri);
       console.log('[Database] Connected to external MongoDB successfully!');
       return;
     } catch (err) {
-      console.warn('[Database] Failed connecting to MONGODB_URI, falling back to embedded MongoDB:', err.message);
+      console.warn('[Database] Failed connecting to MongoDB, falling back to embedded MongoDB:', err.message);
     }
   }
 
