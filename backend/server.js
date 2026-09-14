@@ -24,6 +24,23 @@ app.use('/api/learning', learningRoutes);
 app.use('/api/todos', todoRoutes);
 app.use('/api/notifications', notificationRoutes);
 
+// Root endpoint
+app.get('/', (req, res) => {
+  res.status(200).json({
+    status: 'online',
+    message: '🚀 RetainCurve Spaced Repetition API is running successfully!',
+    endpoints: {
+      health: '/api/health',
+      auth: '/api/auth',
+      learning: '/api/learning',
+      todos: '/api/todos',
+      notifications: '/api/notifications',
+    },
+    version: '1.0.0',
+    timestamp: new Date().toISOString(),
+  });
+});
+
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.status(200).json({
